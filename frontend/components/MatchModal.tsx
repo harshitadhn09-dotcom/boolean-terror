@@ -84,7 +84,7 @@ export default function MatchModal({ user, onClose }: MatchModalProps) {
             You
           </div>
 
-          <span style={{ color: '#52a447', fontSize: '24px' }}>🤝</span>
+          <span style={{ color: '#52a447', fontSize: '24px' }}>🍵</span>
 
           <div
             style={{
@@ -128,7 +128,9 @@ export default function MatchModal({ user, onClose }: MatchModalProps) {
             {user.university}
           </p>
 
-          {user.github_verified ? <GithubVerifiedBadge marginTop="8px" /> : null}
+          {user.github_verified ? (
+            <GithubVerifiedBadge marginTop="8px" />
+          ) : null}
         </motion.div>
 
         <motion.div
