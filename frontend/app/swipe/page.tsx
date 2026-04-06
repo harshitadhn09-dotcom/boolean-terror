@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import SwipeCard from '@/components/SwipeCard';
 import MatchModal from '@/components/MatchModal';
@@ -16,6 +17,7 @@ interface MatchUser {
 }
 
 export default function SwipePage() {
+  const router = useRouter();
   const [users, setUsers] = useState<MatchUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [matchedUser, setMatchedUser] = useState<MatchUser | null>(null);
@@ -24,8 +26,12 @@ export default function SwipePage() {
   useEffect(() => {
     async function fetchMatches() {
       try {
-        // userId '1' is hardcoded for now — Lead will wire real userId later
-        const res = await fetch('/api/match?userId=1');
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+          router.push('/setup');
+          return;
+        }
+        const res = await fetch(`/api/match?userId=${userId}`);
         const data = await res.json();
         setUsers(data);
       } catch (err) {
@@ -38,11 +44,12 @@ export default function SwipePage() {
   }, []);
 
   async function handleLike(targetId: string) {
+    const userId = localStorage.getItem('userId');
     try {
       const res = await fetch('/api/like', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: '1', targetId }),
+        body: JSON.stringify({ userId, targetId }),
       });
       const data = await res.json();
       if (data.matched) {
@@ -93,7 +100,6 @@ export default function SwipePage() {
       <div style={{ position: 'relative', width: '340px', height: '560px' }}>
         <AnimatePresence>
           {users.length > 0 ? (
-            // Show top 3 cards stacked
             users.slice(0, 3).map((user, i) => (
               <motion.div
                 key={user.id}
@@ -115,7 +121,6 @@ export default function SwipePage() {
                     onPass={handlePass}
                   />
                 ) : (
-                  // Background cards (not interactive)
                   <div
                     style={{
                       background: '#111111',
