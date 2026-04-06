@@ -39,7 +39,7 @@ export default function Navbar() {
           letterSpacing: '-1px',
         }}
       >
-        Dev<span style={{ color: '#52a447' }}>Match</span>
+        Match<span style={{ color: '#52a447' }}>a</span>
       </h1>
 
       <div style={{ display: 'flex', gap: '8px' }}>

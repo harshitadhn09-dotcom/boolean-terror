@@ -59,7 +59,7 @@ export default function MatchesPage() {
             margin: 0,
           }}
         >
-          Dev<span style={{ color: '#52a447' }}>Match</span>
+          Match<span style={{ color: '#52a447' }}>a</span>
         </h1>
       </div>
 

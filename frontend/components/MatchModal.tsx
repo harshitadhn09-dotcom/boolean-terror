@@ -92,7 +92,7 @@ export default function MatchModal({ user, onClose }: MatchModalProps) {
             You
           </div>
 
-          <span style={{ color: '#52a447', fontSize: '24px' }}>♥</span>
+          <span style={{ color: '#52a447', fontSize: '24px' }}>🤝</span>
 
           <div
             style={{
