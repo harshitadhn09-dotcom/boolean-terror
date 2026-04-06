@@ -53,6 +53,7 @@ export async function GET(req: Request) {
       skill_ratings: candidate.skill_ratings ?? {},
       compatibilityScore: score,
       reasons,
+      github_verified: candidate.github_verified ?? false
     };
   });
 
