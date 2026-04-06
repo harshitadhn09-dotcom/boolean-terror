@@ -1,15 +1,21 @@
 import { User } from '@/types/user';
 
-function intersection(a: string[], b: string[]) {
+function intersection(a: string[], b: string[]): string[] {
   return a.filter((x) => b.includes(x));
 }
 
-function union(a: string[], b: string[]) {
+function union(a: string[], b: string[]): string[] {
   return Array.from(new Set([...a, ...b]));
 }
 
-export function calculateMatch(userA: User, userB: User) {
-  // skills = 50%
+/**
+ * Calculates the compatibility score and explanation list for two users.
+ */
+export function calculateMatch(
+  userA: User,
+  userB: User,
+): { score: number; reasons: string[] } {
+  // skills = 30%
   const commonSkills = intersection(userA.skills, userB.skills);
   const allSkills = union(userA.skills, userB.skills);
 
@@ -34,7 +40,7 @@ export function calculateMatch(userA: User, userB: User) {
   if (diff === 0) experienceScore = 1;
   else if (diff === 1) experienceScore = 0.7;
 
-  // interest = 15%
+  // interest = 50%
   const commonInterests = intersection(userA.interests, userB.interests);
   const allInterests = union(userA.interests, userB.interests);
 
@@ -43,9 +49,7 @@ export function calculateMatch(userA: User, userB: User) {
       ? 0
       : commonInterests.length / allInterests.length;
 
-  const rawScore = finalSkill * 50 + experienceScore * 20 + interestScore * 15;
-
-  const score = (rawScore / 85) * 100; // normalisise raw score since weight is 85 rn
+  const score = finalSkill * 30 + experienceScore * 20 + interestScore * 50;
 
   return {
     score: Math.round(score),
@@ -61,7 +65,7 @@ function generateReasons(data: {
   commonSkills: string[];
   commonInterests: string[];
   experienceScore: number;
-}) {
+}): string[] {
   const reasons: string[] = [];
 
   if (data.commonSkills.length > 0)

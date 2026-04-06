@@ -2,16 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-
-interface MatchUser {
-  id: string;
-  name: string;
-  university: string;
-  compatibilityScore: number;
-  linkedin?: string;
-  email?: string;
-  github_verified?: boolean;
-}
+import { ContactButton, GithubVerifiedBadge } from '@/components/match/shared';
+import type { MatchUser } from '@/types/user';
 
 interface MatchModalProps {
   user: MatchUser;
@@ -40,7 +32,7 @@ export default function MatchModal({ user, onClose }: MatchModalProps) {
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9 }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        onClick={(e) => e.stopPropagation()}
+        onClick={(event) => event.stopPropagation()}
         style={{
           background: '#111111',
           border: '1px solid #222222',
@@ -136,26 +128,7 @@ export default function MatchModal({ user, onClose }: MatchModalProps) {
             {user.university}
           </p>
 
-          {user.github_verified && (
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                background: '#1a1a1a',
-                border: '1px solid #b8860b',
-                borderRadius: '20px',
-                padding: '4px 12px',
-                fontSize: '12px',
-                color: '#ffd700',
-                fontWeight: 'bold',
-                letterSpacing: '0.5px',
-                width: 'fit-content',
-                marginTop: '8px',
-              }}
-            >
-              GITHUB VERIFIED
-            </div>
-          )}
+          {user.github_verified ? <GithubVerifiedBadge marginTop="8px" /> : null}
         </motion.div>
 
         <motion.div
@@ -196,7 +169,7 @@ export default function MatchModal({ user, onClose }: MatchModalProps) {
           }}
         >
           {user.linkedin ? (
-            <a
+            <ContactButton
               href={user.linkedin}
               target="_blank"
               rel="noopener noreferrer"
@@ -213,11 +186,11 @@ export default function MatchModal({ user, onClose }: MatchModalProps) {
               }}
             >
               Open LinkedIn
-            </a>
+            </ContactButton>
           ) : null}
 
           {user.email ? (
-            <a
+            <ContactButton
               href={`mailto:${user.email}`}
               style={{
                 display: 'block',
@@ -232,7 +205,7 @@ export default function MatchModal({ user, onClose }: MatchModalProps) {
               }}
             >
               Send Email
-            </a>
+            </ContactButton>
           ) : null}
 
           <button

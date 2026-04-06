@@ -2,20 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import SwipeCard from '@/components/SwipeCard';
+import { motion } from 'framer-motion';
 import MatchModal from '@/components/MatchModal';
+import MatchStack from '@/components/match/MatchStack';
 import Navbar from '@/components/Navbar';
-
-interface MatchUser {
-  id: string;
-  name: string;
-  university: string;
-  skills: string[];
-  level: string;
-  compatibilityScore: number;
-  reasons: string[];
-}
+import { getStoredUserId } from '@/lib/storage';
+import type { MatchUser } from '@/types/user';
 
 export default function SwipePage() {
   const router = useRouter();
@@ -25,53 +17,56 @@ export default function SwipePage() {
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    async function fetchMatches() {
+    async function fetchMatches(): Promise<void> {
       try {
-        const userId = localStorage.getItem('userId');
+        const userId = getStoredUserId();
         if (!userId) {
           router.push('/setup');
           return;
         }
-        const res = await fetch(`/api/match?userId=${userId}`);
-        const data = await res.json();
+
+        const response = await fetch(`/api/match?userId=${userId}`);
+        const data = await response.json();
         setUsers(data);
-      } catch (err) {
-        console.error('Failed to fetch matches', err);
+      } catch (error) {
+        console.error('Failed to fetch matches', error);
       } finally {
         setLoading(false);
       }
     }
-    fetchMatches();
-  }, []);
 
-  async function handleLike(targetId: string) {
-    const userId = localStorage.getItem('userId');
+    void fetchMatches();
+  }, [router]);
+
+  async function handleLike(targetId: string): Promise<void> {
+    const userId = getStoredUserId();
     try {
-      const res = await fetch('/api/like', {
+      const response = await fetch('/api/like', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, targetId }),
       });
-      const data = await res.json();
+      const data = await response.json();
       if (data.matched) {
-        const matched = users.find((u) => u.id === targetId);
+        const matched = users.find((user) => user.id === targetId);
         if (matched) {
           setMatchedUser(matched);
           setShowModal(true);
         }
       }
-    } catch (err) {
-      console.error('Like failed', err);
+    } catch (error) {
+      console.error('Like failed', error);
     }
+
     removeUser(targetId);
   }
 
-  function handlePass(targetId: string) {
+  function handlePass(targetId: string): void {
     removeUser(targetId);
   }
 
-  function removeUser(id: string) {
-    setUsers((prev) => prev.filter((u) => u.id !== id));
+  function removeUser(id: string): void {
+    setUsers((previousUsers) => previousUsers.filter((user) => user.id !== id));
   }
 
   if (loading) {
@@ -91,7 +86,6 @@ export default function SwipePage() {
   return (
     <main style={mainStyle}>
       <Navbar />
-      {/* Header */}
       <div
         style={{
           position: 'absolute',
@@ -112,77 +106,11 @@ export default function SwipePage() {
         </h1>
       </div>
 
-      {/* Card Stack */}
-      <div style={{ position: 'relative', width: '340px', height: '560px' }}>
-        <AnimatePresence>
-          {users.length > 0 ? (
-            users.slice(0, 3).map((user, i) => (
-              <motion.div
-                key={user.id}
-                style={{
-                  position: 'absolute',
-                  width: '100%',
-                  zIndex: 3 - i,
-                  top: `${i * 8}px`,
-                  scale: 1 - i * 0.03,
-                  pointerEvents: i === 0 ? 'auto' : 'none',
-                }}
-                animate={{ scale: 1 - i * 0.03, top: i * 8 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              >
-                {i === 0 ? (
-                  <SwipeCard
-                    user={user}
-                    onLike={handleLike}
-                    onPass={handlePass}
-                  />
-                ) : (
-                  <div
-                    style={{
-                      background: '#111111',
-                      border: '1px solid #222222',
-                      borderRadius: '20px',
-                      height: '480px',
-                      width: '340px',
-                    }}
-                  />
-                )}
-              </motion.div>
-            ))
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '100%',
-                gap: '12px',
-              }}
-            >
-              <p
-                style={{
-                  color: '#ffffff',
-                  fontSize: '20px',
-                  fontWeight: '600',
-                }}
-              >
-                You&apos;re all caught up!
-              </p>
-              <p style={{ color: '#aaaaaa', fontSize: '14px' }}>
-                No more matches right now.
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+      <MatchStack users={users} onLike={handleLike} onPass={handlePass} />
 
-      {/* Match Modal */}
-      {showModal && matchedUser && (
+      {showModal && matchedUser ? (
         <MatchModal user={matchedUser} onClose={() => setShowModal(false)} />
-      )}
+      ) : null}
     </main>
   );
 }

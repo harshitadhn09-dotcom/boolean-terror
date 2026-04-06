@@ -1,7 +1,49 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
 import { calculateMatch } from '@/lib/matching';
-import { User } from '@/types/user';
+import { supabase } from '@/lib/supabase';
+import type { MatchUser, User } from '@/types/user';
+
+async function getCurrentUser(userId: string) {
+  return supabase.from('users').select('*').eq('id', userId).single();
+}
+
+async function getLikedIds(userId: string): Promise<string[]> {
+  const { data: likes } = await supabase
+    .from('likes')
+    .select('target_id')
+    .eq('user_id', userId);
+
+  const likedIds = (likes ?? []).map((like: { target_id: string }) => like.target_id);
+  likedIds.push(userId);
+  return likedIds;
+}
+
+/**
+ * Loads candidate users using the existing comma-joined exclusion clause.
+ */
+async function getCandidateUsers(likedIds: string[]) {
+  return supabase.from('users').select('*').not('id', 'in', `(${likedIds.join(',')})`);
+}
+
+function buildMatchResults(currentUser: User, candidates: User[]): MatchUser[] {
+  return candidates
+    .map((candidate) => {
+      const { score, reasons } = calculateMatch(currentUser, candidate);
+      return {
+        id: candidate.id,
+        name: candidate.name,
+        university: candidate.university,
+        skills: candidate.skills,
+        level: candidate.level,
+        skill_ratings: candidate.skill_ratings ?? {},
+        compatibilityScore: score,
+        reasons,
+        github_verified: candidate.github_verified ?? false,
+      };
+    })
+    .sort((a, b) => b.compatibilityScore - a.compatibilityScore)
+    .filter((result) => result.compatibilityScore >= 45);
+}
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -11,59 +53,16 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'userId required' }, { status: 400 });
   }
 
-  // get current user
-  const { data: currentUser, error: userError } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', userId)
-    .single();
-
+  const { data: currentUser, error: userError } = await getCurrentUser(userId);
   if (userError || !currentUser) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
   }
 
-  // get users already liked by current user
-  const { data: likes } = await supabase
-    .from('likes')
-    .select('target_id')
-    .eq('user_id', userId);
-
-  const likedIds = (likes ?? []).map((l: { target_id: string }) => l.target_id);
-  likedIds.push(userId); // exclude self
-
-  // get all other users not yet liked
-  const { data: candidates, error: candError } = await supabase
-    .from('users')
-    .select('*')
-    .not('id', 'in', `(${likedIds.join(',')})`);
-
-  if (candError || !candidates) {
+  const likedIds = await getLikedIds(userId);
+  const { data: candidates, error: candidateError } = await getCandidateUsers(likedIds);
+  if (candidateError || !candidates) {
     return NextResponse.json([]);
   }
 
-  // calculate compatibility for each
-  let results = candidates.map((candidate: User) => {
-    const { score, reasons } = calculateMatch(currentUser as User, candidate);
-    return {
-      id: candidate.id,
-      name: candidate.name,
-      university: candidate.university,
-      skills: candidate.skills,
-      level: candidate.level,
-      skill_ratings: candidate.skill_ratings ?? {},
-      compatibilityScore: score,
-      reasons,
-      github_verified: candidate.github_verified ?? false
-    };
-  });
-
-  // sort by best match first
-  results.sort(
-    (a: { compatibilityScore: number }, b: { compatibilityScore: number }) =>
-      b.compatibilityScore - a.compatibilityScore,
-  );
-  results = results.filter(
-    (r: { compatibilityScore: number }) => r.compatibilityScore >= 45,
-  );
-  return NextResponse.json(results);
+  return NextResponse.json(buildMatchResults(currentUser as User, candidates as User[]));
 }

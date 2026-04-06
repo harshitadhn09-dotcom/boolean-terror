@@ -1,26 +1,41 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
-export async function POST(req: Request) {
-  const body = await req.json();
+type UserProfilePayload = Record<string, unknown>;
+
+function sanitizeProfile(body: UserProfilePayload): UserProfilePayload {
+  // remove passwords before passing payload
   const profile = { ...body };
   delete profile.password;
   delete profile.confirmPassword;
+  return profile;
+}
 
+async function findExistingUserId(email: unknown): Promise<string | null> {
   const { data: existingUser } = await supabase
     .from('users')
     .select('id')
-    .eq('email', profile.email)
+    .eq('email', email)
     .maybeSingle();
 
-  if (existingUser?.id) {
-    const { data, error } = await supabase
-      .from('users')
-      .update(profile)
-      .eq('id', existingUser.id)
-      .select()
-      .single();
+  return existingUser?.id ?? null;
+}
 
+async function updateExistingUser(id: string, profile: UserProfilePayload) {
+  return supabase.from('users').update(profile).eq('id', id).select().single();
+}
+
+async function insertUserProfile(profile: UserProfilePayload) {
+  return supabase.from('users').insert([profile]).select().single();
+}
+
+export async function POST(req: Request) {
+  const body = (await req.json()) as UserProfilePayload;
+  const profile = sanitizeProfile(body);
+  const existingUserId = await findExistingUserId(profile.email);
+
+  if (existingUserId) {
+    const { data, error } = await updateExistingUser(existingUserId, profile);
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
@@ -28,12 +43,7 @@ export async function POST(req: Request) {
     return NextResponse.json(data);
   }
 
-  const { data, error } = await supabase
-    .from('users')
-    .insert([profile])
-    .select()
-    .single();
-
+  const { data, error } = await insertUserProfile(profile);
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

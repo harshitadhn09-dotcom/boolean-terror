@@ -1,5 +1,6 @@
 'use client';
-import { useRef, useEffect, useState } from 'react';
+
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 
 interface NavItem {
@@ -14,20 +15,22 @@ export interface SlidingNavProps {
 
 export default function SlidingNav({ items, activeIndex }: SlidingNavProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [pillStyle, setPillStyle] = useState({ left: 0, width: 0 });
 
   useEffect(() => {
-    const activeBtn = buttonRefs.current[activeIndex];
+    const activeItem = itemRefs.current[activeIndex];
     const container = containerRef.current;
-    if (!activeBtn || !container) return;
+    if (!activeItem || !container) {
+      return;
+    }
 
-    const btnRect = activeBtn.getBoundingClientRect();
+    const itemRect = activeItem.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
 
     setPillStyle({
-      left: btnRect.left - containerRect.left,
-      width: btnRect.width,
+      left: itemRect.left - containerRect.left,
+      width: itemRect.width,
     });
   }, [activeIndex]);
 
@@ -51,7 +54,6 @@ export default function SlidingNav({ items, activeIndex }: SlidingNavProps) {
           borderRadius: '40px',
         }}
       >
-        {/* Single pill that slides between buttons */}
         <motion.div
           animate={{ left: pillStyle.left, width: pillStyle.width }}
           transition={{ type: 'spring', stiffness: 500, damping: 35 }}
@@ -65,18 +67,18 @@ export default function SlidingNav({ items, activeIndex }: SlidingNavProps) {
           }}
         />
 
-        {items.map((item, idx) => (
+        {items.map((item, index) => (
           <div
             key={item.label}
-            ref={(el) => {
-              buttonRefs.current[idx] = el;
+            ref={(element) => {
+              itemRefs.current[index] = element;
             }}
             style={{
               position: 'relative',
               padding: '10px 24px',
               fontSize: '14px',
               fontWeight: '600',
-              color: activeIndex === idx ? '#ffffff' : '#aaaaaa',
+              color: activeIndex === index ? '#ffffff' : '#aaaaaa',
               background: 'transparent',
               border: 'none',
               cursor: 'pointer',
@@ -86,6 +88,7 @@ export default function SlidingNav({ items, activeIndex }: SlidingNavProps) {
               zIndex: 1,
             }}
           >
+            {/* TODO: Refactor - `onChange` is preserved but intentionally not wired to clicks because the current UI is non-interactive. */}
             {item.label}
           </div>
         ))}
