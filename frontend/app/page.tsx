@@ -46,7 +46,7 @@ export default function Home() {
           letterSpacing: '-2px',
         }}
       >
-        Dev<span style={{ color: '#ff2e88' }}>Match</span>
+        Dev<span style={{ color: '#52a447' }}>Match</span>
       </motion.h1>
 
       <motion.p
@@ -68,7 +68,7 @@ export default function Home() {
         style={{
           marginTop: '16px',
           padding: '14px 40px',
-          background: '#ff2e88',
+          background: '#52a447',
           color: '#ffffff',
           border: 'none',
           borderRadius: '12px',
@@ -103,8 +103,8 @@ export default function Home() {
         onClick={handleLogin}
         style={{
           background: 'transparent',
-          border: '1px solid #ff2e88',
-          color: '#ff2e88',
+          border: '1px solid #52a447',
+          color: '#52a447',
           borderRadius: '10px',
           padding: '10px 20px',
           cursor: 'pointer',
@@ -113,7 +113,7 @@ export default function Home() {
       >
         Login
       </button>
-      {err && <p style={{ color: '#ff2e88', fontSize: '13px' }}>{err}</p>}
+      {err && <p style={{ color: '#52a447', fontSize: '13px' }}>{err}</p>}
     </main>
   );
 }

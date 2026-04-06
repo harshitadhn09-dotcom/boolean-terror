@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import SwipeCard from '@/components/SwipeCard';
 import MatchModal from '@/components/MatchModal';
+import Navbar from '@/components/Navbar';
 
 interface MatchUser {
   id: string;
@@ -89,10 +90,25 @@ export default function SwipePage() {
 
   return (
     <main style={mainStyle}>
+      <Navbar />
       {/* Header */}
-      <div style={{ position: 'absolute', top: '24px', left: '50%', transform: 'translateX(-50%)' }}>
-        <h1 style={{ color: '#ffffff', fontSize: '24px', fontWeight: '700', margin: 0 }}>
-          Dev<span style={{ color: '#ff2e88' }}>Match</span>
+      <div
+        style={{
+          position: 'absolute',
+          top: '24px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+        }}
+      >
+        <h1
+          style={{
+            color: '#ffffff',
+            fontSize: '24px',
+            fontWeight: '700',
+            margin: 0,
+          }}
+        >
+          Dev<span style={{ color: '#52a447' }}>Match</span>
         </h1>
       </div>
 
@@ -146,7 +162,13 @@ export default function SwipePage() {
                 gap: '12px',
               }}
             >
-              <p style={{ color: '#ffffff', fontSize: '20px', fontWeight: '600' }}>
+              <p
+                style={{
+                  color: '#ffffff',
+                  fontSize: '20px',
+                  fontWeight: '600',
+                }}
+              >
                 You&apos;re all caught up!
               </p>
               <p style={{ color: '#aaaaaa', fontSize: '14px' }}>
@@ -159,16 +181,14 @@ export default function SwipePage() {
 
       {/* Match Modal */}
       {showModal && matchedUser && (
-        <MatchModal
-          user={matchedUser}
-          onClose={() => setShowModal(false)}
-        />
+        <MatchModal user={matchedUser} onClose={() => setShowModal(false)} />
       )}
     </main>
   );
 }
 
 const mainStyle: React.CSSProperties = {
+  paddingTop: '72px',
   minHeight: '100vh',
   background: '#0a0a0a',
   display: 'flex',

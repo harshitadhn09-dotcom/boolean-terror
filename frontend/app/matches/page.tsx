@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Navbar from '@/components/Navbar';
 
 interface MatchedUser {
   id: string;
@@ -45,6 +46,7 @@ export default function MatchesPage() {
 
   return (
     <main style={mainStyle}>
+      <Navbar />
       {/* Header */}
       <div style={{ position: 'absolute', top: '24px', left: '32px' }}>
         <h1
@@ -55,7 +57,7 @@ export default function MatchesPage() {
             margin: 0,
           }}
         >
-          Dev<span style={{ color: '#ff2e88' }}>Match</span>
+          Dev<span style={{ color: '#52a447' }}>Match</span>
         </h1>
       </div>
 
@@ -99,7 +101,7 @@ export default function MatchesPage() {
               onClick={() => setSelected(m)}
               style={{
                 background: selected?.id === m.id ? '#1a1a1a' : '#111111',
-                border: `1px solid ${selected?.id === m.id ? '#ff2e88' : '#222'}`,
+                border: `1px solid ${selected?.id === m.id ? '#52a447' : '#222'}`,
                 borderRadius: '12px',
                 padding: '16px',
                 cursor: 'pointer',
@@ -251,6 +253,7 @@ export default function MatchesPage() {
 }
 
 const mainStyle: React.CSSProperties = {
+  paddingTop: '72px',
   minHeight: '100vh',
   background: '#0a0a0a',
   display: 'flex',
@@ -276,7 +279,7 @@ const linkedinBtn: React.CSSProperties = {
 
 const emailBtn: React.CSSProperties = {
   display: 'block',
-  background: '#ff2e88',
+  background: '#52a447',
   color: '#fff',
   borderRadius: '12px',
   padding: '14px',

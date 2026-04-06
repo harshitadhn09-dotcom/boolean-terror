@@ -3,8 +3,30 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const SKILLS = ['React', 'Next.js', 'Node.js', 'Python', 'TypeScript', 'Go', 'Rust', 'Flutter', 'ML/AI', 'DevOps', 'Figma', 'SQL'];
-const INTERESTS = ['Web3', 'AI/ML', 'Open Source', 'Gaming', 'FinTech', 'HealthTech', 'EdTech', 'SaaS'];
+const SKILLS = [
+  'React',
+  'Next.js',
+  'Node.js',
+  'Python',
+  'TypeScript',
+  'Go',
+  'Rust',
+  'Flutter',
+  'ML/AI',
+  'DevOps',
+  'Figma',
+  'SQL',
+];
+const INTERESTS = [
+  'Web3',
+  'AI/ML',
+  'Open Source',
+  'Gaming',
+  'FinTech',
+  'HealthTech',
+  'EdTech',
+  'SaaS',
+];
 
 export default function ProfileForm() {
   const router = useRouter();
@@ -21,17 +43,19 @@ export default function ProfileForm() {
   });
 
   function toggleChip(field: 'skills' | 'interests', value: string) {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       [field]: prev[field].includes(value)
-        ? prev[field].filter(v => v !== value)
+        ? prev[field].filter((v) => v !== value)
         : [...prev[field], value],
     }));
   }
 
   async function handleSubmit() {
     if (!form.name || !form.email || !form.level || form.skills.length === 0) {
-      alert('Please fill in name, email, experience level, and at least one skill.');
+      alert(
+        'Please fill in name, email, experience level, and at least one skill.',
+      );
       return;
     }
 
@@ -58,7 +82,14 @@ export default function ProfileForm() {
 
   return (
     <div style={cardStyle}>
-      <h2 style={{ color: '#fff', fontSize: '22px', fontWeight: '700', marginBottom: '24px' }}>
+      <h2
+        style={{
+          color: '#fff',
+          fontSize: '22px',
+          fontWeight: '700',
+          marginBottom: '24px',
+        }}
+      >
         Create Your Profile
       </h2>
 
@@ -68,7 +99,7 @@ export default function ProfileForm() {
         style={inputStyle}
         placeholder="Your name"
         value={form.name}
-        onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+        onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
       />
 
       {/* Gender */}
@@ -76,7 +107,7 @@ export default function ProfileForm() {
       <select
         style={inputStyle}
         value={form.gender}
-        onChange={e => setForm(p => ({ ...p, gender: e.target.value }))}
+        onChange={(e) => setForm((p) => ({ ...p, gender: e.target.value }))}
       >
         <option value="">Select gender</option>
         <option>Male</option>
@@ -91,13 +122,13 @@ export default function ProfileForm() {
         style={inputStyle}
         placeholder="Your university"
         value={form.university}
-        onChange={e => setForm(p => ({ ...p, university: e.target.value }))}
+        onChange={(e) => setForm((p) => ({ ...p, university: e.target.value }))}
       />
 
       {/* Skills */}
       <label style={labelStyle}>Skills</label>
       <div style={chipContainerStyle}>
-        {SKILLS.map(skill => (
+        {SKILLS.map((skill) => (
           <button
             key={skill}
             onClick={() => toggleChip('skills', skill)}
@@ -113,7 +144,7 @@ export default function ProfileForm() {
       <select
         style={inputStyle}
         value={form.level}
-        onChange={e => setForm(p => ({ ...p, level: e.target.value }))}
+        onChange={(e) => setForm((p) => ({ ...p, level: e.target.value }))}
       >
         <option value="">Select level</option>
         <option value="beginner">Beginner</option>
@@ -124,7 +155,7 @@ export default function ProfileForm() {
       {/* Interests */}
       <label style={labelStyle}>Interests</label>
       <div style={chipContainerStyle}>
-        {INTERESTS.map(interest => (
+        {INTERESTS.map((interest) => (
           <button
             key={interest}
             onClick={() => toggleChip('interests', interest)}
@@ -141,7 +172,7 @@ export default function ProfileForm() {
         style={inputStyle}
         placeholder="https://linkedin.com/in/you"
         value={form.linkedin}
-        onChange={e => setForm(p => ({ ...p, linkedin: e.target.value }))}
+        onChange={(e) => setForm((p) => ({ ...p, linkedin: e.target.value }))}
       />
 
       {/* Email */}
@@ -151,7 +182,7 @@ export default function ProfileForm() {
         type="email"
         placeholder="you@example.com"
         value={form.email}
-        onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+        onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
       />
 
       {/* Submit */}
@@ -201,8 +232,8 @@ const chipContainerStyle: React.CSSProperties = {
 };
 
 const chipStyle = (active: boolean): React.CSSProperties => ({
-  background: active ? '#ff2e88' : '#1a1a1a',
-  border: `1px solid ${active ? '#ff2e88' : '#333'}`,
+  background: active ? '#52a447' : '#1a1a1a',
+  border: `1px solid ${active ? '#52a447' : '#333'}`,
   color: '#ffffff',
   borderRadius: '20px',
   padding: '6px 14px',
@@ -213,7 +244,7 @@ const chipStyle = (active: boolean): React.CSSProperties => ({
 
 const buttonStyle: React.CSSProperties = {
   marginTop: '24px',
-  background: '#ff2e88',
+  background: '#52a447',
   color: '#fff',
   border: 'none',
   borderRadius: '12px',
