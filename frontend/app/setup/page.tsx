@@ -24,7 +24,7 @@ export default function SetupPage() {
           marginBottom: '8px',
         }}
       >
-        Dev<span style={{ color: '#52a447' }}>Match</span>
+        Match<span style={{ color: '#52a447' }}>a</span>
       </h1>
       <p style={{ color: '#aaaaaa', marginBottom: '32px', fontSize: '15px' }}>
         Tell us about yourself

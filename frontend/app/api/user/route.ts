@@ -3,10 +3,34 @@ import { supabase } from '@/lib/supabase';
 
 export async function POST(req: Request) {
   const body = await req.json();
+  const profile = { ...body };
+  delete profile.password;
+  delete profile.confirmPassword;
+
+  const { data: existingUser } = await supabase
+    .from('users')
+    .select('id')
+    .eq('email', profile.email)
+    .maybeSingle();
+
+  if (existingUser?.id) {
+    const { data, error } = await supabase
+      .from('users')
+      .update(profile)
+      .eq('id', existingUser.id)
+      .select()
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(data);
+  }
 
   const { data, error } = await supabase
     .from('users')
-    .insert([body])
+    .insert([profile])
     .select()
     .single();
 
