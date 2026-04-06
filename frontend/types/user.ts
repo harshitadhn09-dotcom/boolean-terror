@@ -10,6 +10,8 @@ export interface User {
   email: string;
   skill_ratings?: Record<string, number>;
   github_verified?: boolean;
+  hackathon_type?: string;
+  availability?: string;
 }
 
 export interface MatchUser {
@@ -24,6 +26,8 @@ export interface MatchUser {
   github_verified?: boolean;
   linkedin?: string;
   email?: string;
+  hackathon_type?: string;
+  availability?: string;
 }
 
 export interface MatchedUser {

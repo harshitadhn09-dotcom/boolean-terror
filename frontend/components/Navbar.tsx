@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 const NAV_LINKS = [
   { label: 'Swipe', href: '/swipe' },
   { label: 'Matches', href: '/matches' },
+  { label: 'Profile', href: '/profile' },
 ] as const;
 
 export default function Navbar() {
