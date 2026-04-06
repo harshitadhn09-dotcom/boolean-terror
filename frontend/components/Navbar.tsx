@@ -1,15 +1,15 @@
 'use client';
 
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+
+const NAV_LINKS = [
+  { label: 'Swipe', href: '/swipe' },
+  { label: 'Matches', href: '/matches' },
+] as const;
 
 export default function Navbar() {
   const router = useRouter();
   const path = usePathname();
-
-  const links = [
-    { label: 'Swipe', href: '/swipe' },
-    { label: 'Matches', href: '/matches' },
-  ];
 
   return (
     <nav
@@ -43,14 +43,14 @@ export default function Navbar() {
       </h1>
 
       <div style={{ display: 'flex', gap: '8px' }}>
-        {links.map((l) => (
+        {NAV_LINKS.map((link) => (
           <button
-            key={l.href}
-            onClick={() => router.push(l.href)}
+            key={link.href}
+            onClick={() => router.push(link.href)}
             style={{
-              background: path === l.href ? '#52a447' : 'transparent',
-              border: `1px solid ${path === l.href ? '#52a447' : '#333'}`,
-              color: path === l.href ? '#fff' : '#aaa',
+              background: path === link.href ? '#52a447' : 'transparent',
+              border: `1px solid ${path === link.href ? '#52a447' : '#333'}`,
+              color: path === link.href ? '#fff' : '#aaa',
               borderRadius: '8px',
               padding: '7px 18px',
               fontSize: '14px',
@@ -59,7 +59,7 @@ export default function Navbar() {
               transition: 'all 0.15s',
             }}
           >
-            {l.label}
+            {link.label}
           </button>
         ))}
       </div>

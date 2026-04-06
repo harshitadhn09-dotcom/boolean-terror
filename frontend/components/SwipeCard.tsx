@@ -1,24 +1,14 @@
 'use client';
 
 import {
+  AnimatePresence,
   motion,
   useMotionValue,
   useTransform,
-  AnimatePresence,
 } from 'framer-motion';
 import { useState } from 'react';
-
-interface MatchUser {
-  id: string;
-  name: string;
-  university: string;
-  skills: string[];
-  level: string;
-  compatibilityScore: number;
-  reasons: string[];
-  skill_ratings?: Record<string, number>;
-  github_verified?: boolean;
-}
+import { GithubVerifiedBadge } from '@/components/match/shared';
+import type { MatchUser } from '@/types/user';
 
 interface SwipeCardProps {
   user: MatchUser;
@@ -29,15 +19,13 @@ interface SwipeCardProps {
 export default function SwipeCard({ user, onLike, onPass }: SwipeCardProps) {
   const [gone, setGone] = useState(false);
   const [direction, setDirection] = useState<'left' | 'right' | null>(null);
-
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-20, 20]);
   const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
-
   const likeOpacity = useTransform(x, [0, 80], [0, 1]);
   const passOpacity = useTransform(x, [-80, 0], [1, 0]);
 
-  function handleDragEnd(_: unknown, info: { offset: { x: number } }) {
+  function handleDragEnd(_: unknown, info: { offset: { x: number } }): void {
     if (info.offset.x > 100) {
       setDirection('right');
       setGone(true);
@@ -51,7 +39,7 @@ export default function SwipeCard({ user, onLike, onPass }: SwipeCardProps) {
 
   return (
     <AnimatePresence>
-      {!gone && (
+      {!gone ? (
         <motion.div
           style={{
             x,
@@ -73,7 +61,6 @@ export default function SwipeCard({ user, onLike, onPass }: SwipeCardProps) {
           }}
           whileTap={{ cursor: 'grabbing' }}
         >
-          {/* LIKE stamp */}
           <motion.div
             style={{
               opacity: likeOpacity,
@@ -93,7 +80,6 @@ export default function SwipeCard({ user, onLike, onPass }: SwipeCardProps) {
             LIKE
           </motion.div>
 
-          {/* PASS stamp */}
           <motion.div
             style={{
               opacity: passOpacity,
@@ -113,7 +99,6 @@ export default function SwipeCard({ user, onLike, onPass }: SwipeCardProps) {
             PASS
           </motion.div>
 
-          {/* Card */}
           <div
             style={{
               background: '#111111',
@@ -126,7 +111,6 @@ export default function SwipeCard({ user, onLike, onPass }: SwipeCardProps) {
               userSelect: 'none',
             }}
           >
-            {/* Name + University */}
             <div>
               <h2
                 style={{
@@ -149,27 +133,8 @@ export default function SwipeCard({ user, onLike, onPass }: SwipeCardProps) {
               </p>
             </div>
 
-            {user.github_verified && (
-              <div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  background: '#1a1a1a',
-                  border: '1px solid #b8860b',
-                  borderRadius: '20px',
-                  padding: '4px 12px',
-                  fontSize: '12px',
-                  color: '#ffd700',
-                  fontWeight: 'bold',
-                  letterSpacing: '0.5px',
-                  width: 'fit-content',
-                }}
-              >
-                GITHUB VERIFIED
-              </div>
-            )}
+            {user.github_verified ? <GithubVerifiedBadge /> : null}
 
-            {/* Compatibility Score */}
             <div style={{ textAlign: 'center', padding: '12px 0' }}>
               <span
                 style={{
@@ -191,7 +156,7 @@ export default function SwipeCard({ user, onLike, onPass }: SwipeCardProps) {
                 compatibility
               </p>
             </div>
-            {/* Skills */}
+
             <div>
               <p
                 style={{
@@ -223,13 +188,13 @@ export default function SwipeCard({ user, onLike, onPass }: SwipeCardProps) {
                       <span style={{ color: '#fff', fontSize: '13px' }}>
                         {skill}
                       </span>
-                      {rating && (
+                      {rating ? (
                         <div style={{ display: 'flex', gap: '1px' }}>
-                          {[1, 2, 3, 4, 5].map((i) => (
+                          {[1, 2, 3, 4, 5].map((index) => (
                             <span
-                              key={i}
+                              key={index}
                               style={{
-                                color: i <= rating ? '#52a447' : '#333',
+                                color: index <= rating ? '#52a447' : '#333',
                                 fontSize: '11px',
                               }}
                             >
@@ -237,14 +202,13 @@ export default function SwipeCard({ user, onLike, onPass }: SwipeCardProps) {
                             </span>
                           ))}
                         </div>
-                      )}
+                      ) : null}
                     </div>
                   );
                 })}
               </div>
             </div>
 
-            {/* Experience */}
             <div>
               <p
                 style={{
@@ -269,23 +233,21 @@ export default function SwipeCard({ user, onLike, onPass }: SwipeCardProps) {
               </p>
             </div>
 
-            {/* Reasons */}
             <div style={{ borderTop: '1px solid #222', paddingTop: '12px' }}>
-              {user.reasons.map((r, i) => (
+              {user.reasons.map((reason, index) => (
                 <p
-                  key={i}
+                  key={index}
                   style={{
                     color: '#aaaaaa',
                     margin: '4px 0',
                     fontSize: '13px',
                   }}
                 >
-                  ✦ {r}
+                  ✦ {reason}
                 </p>
               ))}
             </div>
 
-            {/* Buttons */}
             <div
               style={{
                 display: 'flex',
@@ -335,7 +297,7 @@ export default function SwipeCard({ user, onLike, onPass }: SwipeCardProps) {
             </div>
           </div>
         </motion.div>
-      )}
+      ) : null}
     </AnimatePresence>
   );
 }
