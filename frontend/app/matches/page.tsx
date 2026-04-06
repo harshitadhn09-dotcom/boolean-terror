@@ -13,6 +13,7 @@ interface MatchedUser {
   linkedin: string;
   email: string;
   skill_ratings?: Record<string, number>;
+  github_verified?: boolean;
 }
 
 export default function MatchesPage() {
@@ -153,6 +154,27 @@ export default function MatchesPage() {
               <p style={{ color: '#aaaaaa', margin: '4px 0 0' }}>
                 {selected.university}
               </p>
+
+              {selected.github_verified && (
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    background: '#1a1a1a',
+                    border: '1px solid #b8860b',
+                    borderRadius: '20px',
+                    padding: '4px 12px',
+                    fontSize: '12px',
+                    color: '#ffd700',
+                    fontWeight: 'bold',
+                    letterSpacing: '0.5px',
+                    width: 'fit-content',
+                    marginTop: '8px',
+                  }}
+                >
+                  GITHUB VERIFIED
+                </div>
+              )}
             </div>
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>

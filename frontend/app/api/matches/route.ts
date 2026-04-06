@@ -23,7 +23,7 @@ export async function GET(req: Request) {
   const { data: users } = await supabase
     .from('users')
     .select(
-      'id, name, university, skills, level, linkedin, email, skill_ratings',
+      'id, name, university, skills, level, linkedin, email, skill_ratings, github_verified',
     )
     .in('id', otherIds);
 
