@@ -10,6 +10,7 @@ interface MatchUser {
   compatibilityScore: number;
   linkedin?: string;
   email?: string;
+  github_verified?: boolean;
 }
 
 interface MatchModalProps {
@@ -115,6 +116,11 @@ export default function MatchModal({ user, onClose }: MatchModalProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.25 }}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
         >
           <p
             style={{
@@ -129,6 +135,27 @@ export default function MatchModal({ user, onClose }: MatchModalProps) {
           <p style={{ color: '#aaaaaa', fontSize: '14px', margin: '4px 0 0' }}>
             {user.university}
           </p>
+
+          {user.github_verified && (
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                background: '#1a1a1a',
+                border: '1px solid #b8860b',
+                borderRadius: '20px',
+                padding: '4px 12px',
+                fontSize: '12px',
+                color: '#ffd700',
+                fontWeight: 'bold',
+                letterSpacing: '0.5px',
+                width: 'fit-content',
+                marginTop: '8px',
+              }}
+            >
+              GITHUB VERIFIED
+            </div>
+          )}
         </motion.div>
 
         <motion.div

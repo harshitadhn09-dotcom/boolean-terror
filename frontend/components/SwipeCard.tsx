@@ -150,19 +150,22 @@ export default function SwipeCard({ user, onLike, onPass }: SwipeCardProps) {
             </div>
 
             {user.github_verified && (
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                background: '#1a1a1a',
-                border: '1px solid #333',
-                borderRadius: '20px',
-                padding: '3px 10px',
-                fontSize: '12px',
-                color: '#52a447',
-                width: 'fit-content',
-              }}>
-                ✓ GitHub Verified
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  background: '#1a1a1a',
+                  border: '1px solid #b8860b',
+                  borderRadius: '20px',
+                  padding: '4px 12px',
+                  fontSize: '12px',
+                  color: '#ffd700',
+                  fontWeight: 'bold',
+                  letterSpacing: '0.5px',
+                  width: 'fit-content',
+                }}
+              >
+                GITHUB VERIFIED
               </div>
             )}
 
