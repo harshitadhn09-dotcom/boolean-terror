@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { verifyGithub } from '@/lib/verifyGithub';
 
 const SKILLS = [
   'React',
@@ -40,7 +41,8 @@ export default function ProfileForm() {
     interests: [] as string[],
     linkedin: '',
     email: '',
-  });
+    github: '',
+  }); 
 
   function toggleChip(field: 'skills' | 'interests', value: string) {
     setForm((prev) => ({
@@ -61,11 +63,16 @@ export default function ProfileForm() {
 
     setLoading(true);
     try {
+      let github_verified = false;
+      if (form.github) {
+        github_verified = await verifyGithub(form.github);
+      }
       const res = await fetch('/api/user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, github_verified }),
       });
+      
       const data = await res.json();
       if (data.id) {
         localStorage.setItem('userId', data.id);
@@ -174,6 +181,14 @@ export default function ProfileForm() {
         placeholder="https://linkedin.com/in/you"
         value={form.linkedin}
         onChange={(e) => setForm((p) => ({ ...p, linkedin: e.target.value }))}
+      />
+
+      <label style={labelStyle}>GitHub Username (optional)</label>
+      <input
+        style={inputStyle}
+        placeholder="your-github-username"
+        value={form.github ?? ''}
+        onChange={(e) => setForm((p) => ({ ...p, github: e.target.value }))}
       />
 
       {/* Email */}

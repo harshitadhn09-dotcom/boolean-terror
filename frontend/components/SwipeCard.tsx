@@ -17,6 +17,7 @@ interface MatchUser {
   compatibilityScore: number;
   reasons: string[];
   skill_ratings?: Record<string, number>;
+  github_verified?: boolean;
 }
 
 interface SwipeCardProps {
@@ -147,6 +148,23 @@ export default function SwipeCard({ user, onLike, onPass }: SwipeCardProps) {
                 {user.university}
               </p>
             </div>
+
+            {user.github_verified && (
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                background: '#1a1a1a',
+                border: '1px solid #333',
+                borderRadius: '20px',
+                padding: '3px 10px',
+                fontSize: '12px',
+                color: '#52a447',
+                width: 'fit-content',
+              }}>
+                ✓ GitHub Verified
+              </div>
+            )}
 
             {/* Compatibility Score */}
             <div style={{ textAlign: 'center', padding: '12px 0' }}>

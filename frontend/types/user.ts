@@ -9,4 +9,5 @@ export interface User {
   linkedin: string;
   email: string;
   skill_ratings?: Record<string, number>;
+  github_verified?: boolean;
 }
