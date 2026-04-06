@@ -69,7 +69,8 @@ export default function ProfileForm() {
       const data = await res.json();
       if (data.id) {
         localStorage.setItem('userId', data.id);
-        router.push('/swipe');
+        localStorage.setItem('quizSkills', JSON.stringify(form.skills));
+        router.push('/quiz');
       } else {
         alert('Something went wrong. Try again.');
       }

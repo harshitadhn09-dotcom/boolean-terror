@@ -12,6 +12,7 @@ interface MatchedUser {
   level: string;
   linkedin: string;
   email: string;
+  skill_ratings?: Record<string, number>;
 }
 
 export default function MatchesPage() {
@@ -167,7 +168,57 @@ export default function MatchesPage() {
                     fontSize: '13px',
                   }}
                 >
-                  {s}
+                  {selected.skill_ratings &&
+                    Object.keys(selected.skill_ratings).length > 0 && (
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '8px',
+                        }}
+                      >
+                        <p
+                          style={{
+                            color: '#aaaaaa',
+                            fontSize: '12px',
+                            margin: 0,
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px',
+                          }}
+                        >
+                          Skill Ratings
+                        </p>
+                        {Object.entries(selected.skill_ratings).map(
+                          ([skill, rating]) => (
+                            <div
+                              key={skill}
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                              }}
+                            >
+                              <span style={{ color: '#fff', fontSize: '13px' }}>
+                                {skill}
+                              </span>
+                              <div style={{ display: 'flex', gap: '2px' }}>
+                                {[1, 2, 3, 4, 5].map((i) => (
+                                  <span
+                                    key={i}
+                                    style={{
+                                      color: i <= rating ? '#52a447' : '#333',
+                                      fontSize: '16px',
+                                    }}
+                                  >
+                                    ★
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          ),
+                        )}
+                      </div>
+                    )}{' '}
                 </span>
               ))}
             </div>

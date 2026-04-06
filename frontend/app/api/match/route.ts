@@ -50,6 +50,7 @@ export async function GET(req: Request) {
       university: candidate.university,
       skills: candidate.skills,
       level: candidate.level,
+      skill_ratings: candidate.skill_ratings ?? {},
       compatibilityScore: score,
       reasons,
     };

@@ -16,6 +16,7 @@ interface MatchUser {
   level: string;
   compatibilityScore: number;
   reasons: string[];
+  skill_ratings?: Record<string, number>;
 }
 
 interface SwipeCardProps {
@@ -169,7 +170,6 @@ export default function SwipeCard({ user, onLike, onPass }: SwipeCardProps) {
                 compatibility
               </p>
             </div>
-
             {/* Skills */}
             <div>
               <p
@@ -184,21 +184,42 @@ export default function SwipeCard({ user, onLike, onPass }: SwipeCardProps) {
                 Skills
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                {user.skills.map((skill) => (
-                  <span
-                    key={skill}
-                    style={{
-                      background: '#1a1a1a',
-                      border: '1px solid #333',
-                      color: '#ffffff',
-                      borderRadius: '20px',
-                      padding: '4px 12px',
-                      fontSize: '13px',
-                    }}
-                  >
-                    {skill}
-                  </span>
-                ))}
+                {user.skills.map((skill) => {
+                  const rating = user.skill_ratings?.[skill];
+                  return (
+                    <div
+                      key={skill}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        background: '#1a1a1a',
+                        border: '1px solid #333',
+                        borderRadius: '20px',
+                        padding: '4px 12px',
+                      }}
+                    >
+                      <span style={{ color: '#fff', fontSize: '13px' }}>
+                        {skill}
+                      </span>
+                      {rating && (
+                        <div style={{ display: 'flex', gap: '1px' }}>
+                          {[1, 2, 3, 4, 5].map((i) => (
+                            <span
+                              key={i}
+                              style={{
+                                color: i <= rating ? '#52a447' : '#333',
+                                fontSize: '11px',
+                              }}
+                            >
+                              ★
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 

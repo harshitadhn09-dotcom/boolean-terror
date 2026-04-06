@@ -8,4 +8,5 @@ export interface User {
   interests: string[];
   linkedin: string;
   email: string;
+  skill_ratings?: Record<string, number>;
 }
