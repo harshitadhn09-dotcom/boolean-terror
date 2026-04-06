@@ -1,94 +1,135 @@
+// frontend/app/profile/page.tsx
+
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
-import QuizChat from '@/components/quiz/QuizChat';
-import QuizInput from '@/components/quiz/QuizInput';
-import QuizProgress from '@/components/quiz/QuizProgress';
-import QuizSummary from '@/components/quiz/QuizSummary';
-import { buildRatingsMap, useQuizFlow } from '@/components/quiz/useQuizFlow';
-import {
-  clearStoredQuizSkills,
-  getStoredQuizSkills,
-  getStoredUserId,
-} from '@/lib/storage';
-import type { QuizRating } from '@/types/user';
+import { getStoredUserId } from '@/lib/storage';
+import { supabase } from '@/lib/supabase';
 
-export default function QuizPage() {
+type ProfileFormState = {
+  hackathon_type: string;
+  availability: string;
+  email: string;
+};
+
+function formatForDateTimeLocal(value: string | null | undefined) {
+  if (!value) return '';
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return '';
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+export default function ProfilePage() {
   const router = useRouter();
-  const [skills] = useState<string[]>(() => {
-    return getStoredQuizSkills()?.slice(0, 3) ?? [];
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState<'success' | 'error' | ''>('');
+
+  const [form, setForm] = useState<ProfileFormState>({
+    hackathon_type: '',
+    availability: '',
+    email: '',
   });
-  const [doneRatings, setDoneRatings] = useState<QuizRating[]>([]);
-  const { currentSkillIdx, done, history, input, loading, ratings, sendAnswer, setInput } =
-    useQuizFlow({
-      skills,
-      onDone: (finalRatings) => {
-        void saveRatings(finalRatings);
-      },
-    });
 
   useEffect(() => {
-    if (skills.length === 0) {
-      router.push('/setup');
+    async function loadProfile() {
+      const userId = getStoredUserId();
+
+      if (!userId) {
+        router.push('/setup');
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('hackathon_type, availability, email')
+          .eq('id', userId)
+          .single();
+
+        if (error) {
+          console.error('Failed to load profile:', error);
+          setMessage('Failed to load profile.');
+          setMessageType('error');
+        }
+
+        if (data) {
+          setForm({
+            hackathon_type: data.hackathon_type || '',
+            availability: formatForDateTimeLocal(data.availability),
+            email: data.email || '',
+          });
+        }
+      } catch (error) {
+        console.error('Unexpected load error:', error);
+        setMessage('Something went wrong while loading your profile.');
+        setMessageType('error');
+      } finally {
+        setLoading(false);
+      }
     }
-  }, [router, skills.length]);
 
-  async function saveRatings(finalRatings: QuizRating[]): Promise<void> {
-    const userId = getStoredUserId();
-    const skill_ratings = buildRatingsMap(finalRatings);
+    void loadProfile();
+  }, [router]);
 
-    await fetch('/api/quiz/save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, skill_ratings }),
-    });
+  async function handleSave() {
+    setSaving(true);
+    setMessage('');
+    setMessageType('');
 
-    clearStoredQuizSkills();
-    setDoneRatings(finalRatings);
+    try {
+      const payload = {
+        ...form,
+        availability: form.availability
+          ? new Date(form.availability).toISOString()
+          : null,
+      };
+
+      const response = await fetch('/api/user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+
+      setMessage('Preferences updated successfully!');
+      setMessageType('success');
+    } catch (error) {
+      console.error('Failed to save:', error);
+      setMessage('Failed to save preferences.');
+      setMessageType('error');
+    } finally {
+      setSaving(false);
+    }
   }
 
-  if (done) {
+  if (loading) {
     return (
       <main style={mainStyle}>
         <Navbar />
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          style={{
-            background: '#111',
-            border: '1px solid #222',
-            borderRadius: '20px',
-            padding: '40px 32px',
-            maxWidth: '440px',
-            width: '100%',
-            textAlign: 'center',
-          }}
+        <motion.p
+          animate={{ opacity: [0.4, 1, 0.4] }}
+          transition={{ repeat: Infinity, duration: 1.5 }}
+          style={{ color: '#aaaaaa', fontSize: '16px' }}
         >
-          <QuizSummary
-            ratings={doneRatings.length > 0 ? doneRatings : ratings}
-            title="Quiz Complete 🎉"
-            subtitle="Here's how you rated"
-          />
-          <button
-            onClick={() => router.push('/swipe')}
-            style={{
-              background: '#52a447',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '10px',
-              padding: '13px 32px',
-              fontSize: '15px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              width: '100%',
-            }}
-          >
-            Start Swiping →
-          </button>
-        </motion.div>
+          Loading profile...
+        </motion.p>
       </main>
     );
   }
@@ -96,70 +137,158 @@ export default function QuizPage() {
   return (
     <main style={mainStyle}>
       <Navbar />
-      <div style={{ width: '100%', maxWidth: '540px' }}>
-        <QuizProgress
-          currentSkillIdx={currentSkillIdx}
-          skills={skills}
-          marginBottom="24px"
-        />
-        <QuizChat
-          history={history}
-          loading={loading}
-          loadingLabel="thinking..."
-          containerStyle={{
-            background: '#111',
-            border: '1px solid #222',
-            borderRadius: '20px',
-            padding: '24px',
+
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={cardStyle}
+      >
+        <h2 style={{ color: '#fff', fontSize: '24px', margin: '0 0 24px 0' }}>
+          Edit Preferences
+        </h2>
+
+        <div
+          style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '12px',
-            minHeight: '320px',
-            marginBottom: '16px',
+            gap: '8px',
+            marginBottom: '20px',
           }}
-        />
-        <QuizInput
-          input={input}
-          loading={loading}
-          onInputChange={setInput}
-          onSubmit={() => {
-            void sendAnswer();
+        >
+          <label style={labelStyle}>Hackathon Type</label>
+          <select
+            style={inputStyle}
+            value={form.hackathon_type}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, hackathon_type: e.target.value }))
+            }
+          >
+            <option value="">Select type</option>
+            <option value="online">Online</option>
+            <option value="offline">In-person</option>
+            <option value="both">Both</option>
+          </select>
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            marginBottom: '20px',
           }}
-          inputStyle={{
-            flex: 1,
-            background: '#111',
-            border: '1px solid #333',
-            borderRadius: '10px',
-            color: '#fff',
-            padding: '12px 14px',
-            fontSize: '14px',
-            outline: 'none',
+        >
+          <label style={labelStyle}>Availability Date & Time</label>
+          <input
+            style={inputStyle}
+            type="datetime-local"
+            value={form.availability}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, availability: e.target.value }))
+            }
+          />
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            marginBottom: '28px',
           }}
-          buttonStyle={{
-            background: '#52a447',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '10px',
-            padding: '12px 20px',
-            fontSize: '14px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            opacity: loading ? 0.5 : 1,
-          }}
-        />
-      </div>
+        >
+          <label style={labelStyle}>Email</label>
+          <input
+            style={inputStyle}
+            type="email"
+            placeholder="Enter your email"
+            value={form.email}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, email: e.target.value }))
+            }
+          />
+        </div>
+
+        {message ? (
+          <div
+            style={{
+              marginBottom: '16px',
+              padding: '12px 14px',
+              borderRadius: '10px',
+              fontSize: '14px',
+              border:
+                messageType === 'success'
+                  ? '1px solid #2f6f3b'
+                  : '1px solid #6f2f2f',
+              background: messageType === 'success' ? '#112417' : '#241111',
+              color: messageType === 'success' ? '#8ee39c' : '#ff9b9b',
+            }}
+          >
+            {message}
+          </div>
+        ) : null}
+
+        <button
+          onClick={() => void handleSave()}
+          style={{ ...buttonStyle, opacity: saving ? 0.7 : 1 }}
+          disabled={saving}
+        >
+          {saving ? 'Saving...' : 'Save Changes'}
+        </button>
+      </motion.div>
     </main>
   );
 }
 
 const mainStyle: React.CSSProperties = {
+  paddingTop: '72px',
   minHeight: '100vh',
   background: '#0a0a0a',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  justifyContent: 'center',
   fontFamily: 'sans-serif',
-  padding: '80px 24px 32px',
-  position: 'relative',
+};
+
+const cardStyle: React.CSSProperties = {
+  background: '#111',
+  border: '1px solid #222',
+  borderRadius: '16px',
+  padding: '32px',
+  width: '100%',
+  maxWidth: '480px',
+  marginTop: '48px',
+  display: 'flex',
+  flexDirection: 'column',
+};
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '14px 16px',
+  borderRadius: '12px',
+  border: '1px solid #333',
+  background: '#000',
+  color: '#fff',
+  fontSize: '15px',
+  outline: 'none',
+  boxSizing: 'border-box',
+};
+
+const labelStyle: React.CSSProperties = {
+  color: '#aaa',
+  fontSize: '14px',
+  fontWeight: '500',
+};
+
+const buttonStyle: React.CSSProperties = {
+  background: '#52a447',
+  color: '#fff',
+  border: 'none',
+  borderRadius: '12px',
+  padding: '16px',
+  fontSize: '16px',
+  fontWeight: '600',
+  cursor: 'pointer',
+  width: '100%',
+  transition: 'opacity 0.2s',
 };

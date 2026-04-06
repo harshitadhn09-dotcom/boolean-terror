@@ -8,14 +8,24 @@ function union(a: string[], b: string[]): string[] {
   return Array.from(new Set([...a, ...b]));
 }
 
-/**
- * Calculates the compatibility score and explanation list for two users.
- */
 export function calculateMatch(
   userA: User,
   userB: User,
 ): { score: number; reasons: string[] } {
-  // skills = 30%
+  const typeMatch = 
+    userA.hackathon_type === userB.hackathon_type || 
+    userA.hackathon_type === 'both' || 
+    userB.hackathon_type === 'both';
+  
+  const availabilityMatch = 
+    !userA.availability || 
+    !userB.availability || 
+    userA.availability === userB.availability;
+
+  if (!typeMatch || !availabilityMatch) {
+    return { score: 0, reasons: ['Mismatched hackathon schedule or type'] };
+  }
+
   const commonSkills = intersection(userA.skills, userB.skills);
   const allSkills = union(userA.skills, userB.skills);
 
@@ -29,7 +39,6 @@ export function calculateMatch(
 
   const finalSkill = 0.7 * skillScore + 0.3 * complement;
 
-  // experience = 20%
   const levels = ['beginner', 'intermediate', 'advanced'];
 
   const diff = Math.abs(
@@ -40,7 +49,6 @@ export function calculateMatch(
   if (diff === 0) experienceScore = 1;
   else if (diff === 1) experienceScore = 0.7;
 
-  // interest = 50%
   const commonInterests = intersection(userA.interests, userB.interests);
   const allInterests = union(userA.interests, userB.interests);
 
