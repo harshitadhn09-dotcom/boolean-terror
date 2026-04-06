@@ -2,9 +2,24 @@
 
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 
 export default function Home() {
   const router = useRouter();
+
+  const [email, setEmail] = useState('');
+  const [err, setErr] = useState('');
+
+  async function handleLogin() {
+    const res = await fetch(`/api/user?email=${email}`);
+    const data = await res.json();
+    if (data?.id) {
+      localStorage.setItem('userId', data.id);
+      router.push('/swipe');
+    } else {
+      setErr('No account found.');
+    }
+  }
 
   return (
     <main
@@ -65,6 +80,40 @@ export default function Home() {
       >
         Get Started
       </motion.button>
+
+      <p style={{ color: '#555', fontSize: '13px', marginTop: '16px' }}>
+        Already have a profile?
+      </p>
+      <input
+        style={{
+          background: '#1a1a1a',
+          border: '1px solid #333',
+          color: '#fff',
+          borderRadius: '10px',
+          padding: '10px 14px',
+          fontSize: '14px',
+          width: '260px',
+          outline: 'none',
+        }}
+        placeholder="Enter your email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <button
+        onClick={handleLogin}
+        style={{
+          background: 'transparent',
+          border: '1px solid #ff2e88',
+          color: '#ff2e88',
+          borderRadius: '10px',
+          padding: '10px 20px',
+          cursor: 'pointer',
+          fontSize: '14px',
+        }}
+      >
+        Login
+      </button>
+      {err && <p style={{ color: '#ff2e88', fontSize: '13px' }}>{err}</p>}
     </main>
   );
 }
