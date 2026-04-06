@@ -4,21 +4,52 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import PixelSnow from '@/components/PixelSnow'; // <-- Import PixelSnow
+import { supabase } from '@/lib/supabase';
 
 export default function Home() {
   const router = useRouter();
 
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [err, setErr] = useState('');
+  const [loading, setLoading] = useState(false);
 
   async function handleLogin() {
-    const res = await fetch(`/api/user?email=${email}`);
-    const data = await res.json();
-    if (data?.id) {
-      localStorage.setItem('userId', data.id);
-      router.push('/swipe');
-    } else {
-      setErr('No account found.');
+    setErr('');
+
+    if (!email || !password) {
+      setErr('Enter your email and password.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setErr(error.message);
+        return;
+      }
+
+      const accountEmail = authData.user.email;
+      if (!accountEmail) {
+        setErr('Login succeeded, but no email was returned.');
+        return;
+      }
+
+      const res = await fetch(`/api/user?email=${encodeURIComponent(accountEmail)}`);
+      const data = await res.json();
+      if (data?.id) {
+        localStorage.setItem('userId', data.id);
+        router.push('/swipe');
+      } else {
+        setErr('Account found, but profile setup is incomplete.');
+      }
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -148,23 +179,45 @@ export default function Home() {
             Already have a profile?
           </p>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <input
-              style={{
-                background: '#1a1a1a',
-                border: '1px solid #333',
-                color: '#fff',
-                borderRadius: '10px',
-                padding: '10px 14px',
-                fontSize: '14px',
-                width: '220px',
-                outline: 'none',
-              }}
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <input
+                style={{
+                  background: '#1a1a1a',
+                  border: '1px solid #333',
+                  color: '#fff',
+                  borderRadius: '10px',
+                  padding: '10px 14px',
+                  fontSize: '14px',
+                  width: '220px',
+                  outline: 'none',
+                }}
+                type="text"
+                inputMode="email"
+                autoComplete="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <input
+                style={{
+                  background: '#1a1a1a',
+                  border: '1px solid #333',
+                  color: '#fff',
+                  borderRadius: '10px',
+                  padding: '10px 14px',
+                  fontSize: '14px',
+                  width: '220px',
+                  outline: 'none',
+                }}
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
             <button
               onClick={handleLogin}
+              disabled={loading}
               style={{
                 background: 'rgba(10, 10, 10, 0.8)',
                 border: '1px solid #52a447',
@@ -174,9 +227,10 @@ export default function Home() {
                 cursor: 'pointer',
                 fontSize: '14px',
                 fontWeight: '600',
+                opacity: loading ? 0.7 : 1,
               }}
             >
-              Login
+              {loading ? 'Logging In...' : 'Login'}
             </button>
           </div>
           {err && (
