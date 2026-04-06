@@ -32,13 +32,6 @@ export function calculateMatch(
   const skillScore =
     allSkills.length === 0 ? 0 : commonSkills.length / allSkills.length;
 
-  const complement =
-    allSkills.length === 0
-      ? 0
-      : (allSkills.length - commonSkills.length) / allSkills.length;
-
-  const finalSkill = 0.7 * skillScore + 0.3 * complement;
-
   const levels = ['beginner', 'intermediate', 'advanced'];
 
   const diff = Math.abs(
@@ -57,7 +50,7 @@ export function calculateMatch(
       ? 0
       : commonInterests.length / allInterests.length;
 
-  const score = finalSkill * 30 + experienceScore * 20 + interestScore * 50;
+  const score = skillScore * 60 + experienceScore * 30 + interestScore * 10;
 
   return {
     score: Math.round(score),
