@@ -16,3 +16,16 @@ export async function POST(req: Request) {
 
   return NextResponse.json(data);
 }
+
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const email = searchParams.get('email');
+
+  const { data } = await supabase
+    .from('users')
+    .select('id')
+    .eq('email', email)
+    .single();
+
+  return NextResponse.json(data ?? {});
+}

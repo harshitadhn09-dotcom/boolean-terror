@@ -58,7 +58,12 @@ export default function MatchModal({ user, onClose }: MatchModalProps) {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          style={{ color: '#ffffff', fontSize: '28px', fontWeight: '700', margin: 0 }}
+          style={{
+            color: '#ffffff',
+            fontSize: '28px',
+            fontWeight: '700',
+            margin: 0,
+          }}
         >
           It&apos;s a Match! 🎉
         </motion.h2>
@@ -74,7 +79,7 @@ export default function MatchModal({ user, onClose }: MatchModalProps) {
               width: '64px',
               height: '64px',
               borderRadius: '50%',
-              background: '#ff2e88',
+              background: '#52a447',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -86,7 +91,7 @@ export default function MatchModal({ user, onClose }: MatchModalProps) {
             You
           </div>
 
-          <span style={{ color: '#ff2e88', fontSize: '24px' }}>♥</span>
+          <span style={{ color: '#52a447', fontSize: '24px' }}>♥</span>
 
           <div
             style={{
@@ -111,7 +116,14 @@ export default function MatchModal({ user, onClose }: MatchModalProps) {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.25 }}
         >
-          <p style={{ color: '#ffffff', fontSize: '20px', fontWeight: '600', margin: 0 }}>
+          <p
+            style={{
+              color: '#ffffff',
+              fontSize: '20px',
+              fontWeight: '600',
+              margin: 0,
+            }}
+          >
             {user.name}
           </p>
           <p style={{ color: '#aaaaaa', fontSize: '14px', margin: '4px 0 0' }}>
@@ -130,7 +142,14 @@ export default function MatchModal({ user, onClose }: MatchModalProps) {
             padding: '12px 32px',
           }}
         >
-          <p style={{ color: '#ff2e88', fontSize: '36px', fontWeight: '700', margin: 0 }}>
+          <p
+            style={{
+              color: '#52a447',
+              fontSize: '36px',
+              fontWeight: '700',
+              margin: 0,
+            }}
+          >
             {user.compatibilityScore}%
           </p>
           <p style={{ color: '#aaaaaa', fontSize: '13px', margin: '4px 0 0' }}>
@@ -175,7 +194,7 @@ export default function MatchModal({ user, onClose }: MatchModalProps) {
               href={`mailto:${user.email}`}
               style={{
                 display: 'block',
-                background: '#ff2e88',
+                background: '#52a447',
                 color: '#ffffff',
                 borderRadius: '12px',
                 padding: '14px',

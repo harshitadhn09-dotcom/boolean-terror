@@ -1,6 +1,11 @@
 'use client';
 
-import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
+import {
+  motion,
+  useMotionValue,
+  useTransform,
+  AnimatePresence,
+} from 'framer-motion';
 import { useState } from 'react';
 
 interface MatchUser {
@@ -11,6 +16,7 @@ interface MatchUser {
   level: string;
   compatibilityScore: number;
   reasons: string[];
+  skill_ratings?: Record<string, number>;
 }
 
 interface SwipeCardProps {
@@ -121,10 +127,23 @@ export default function SwipeCard({ user, onLike, onPass }: SwipeCardProps) {
           >
             {/* Name + University */}
             <div>
-              <h2 style={{ color: '#ffffff', margin: 0, fontSize: '24px', fontWeight: '600' }}>
+              <h2
+                style={{
+                  color: '#ffffff',
+                  margin: 0,
+                  fontSize: '24px',
+                  fontWeight: '600',
+                }}
+              >
                 {user.name}
               </h2>
-              <p style={{ color: '#aaaaaa', margin: '4px 0 0', fontSize: '14px' }}>
+              <p
+                style={{
+                  color: '#aaaaaa',
+                  margin: '4px 0 0',
+                  fontSize: '14px',
+                }}
+              >
                 {user.university}
               </p>
             </div>
@@ -135,47 +154,96 @@ export default function SwipeCard({ user, onLike, onPass }: SwipeCardProps) {
                 style={{
                   fontSize: '56px',
                   fontWeight: '700',
-                  color: '#ff2e88',
+                  color: '#52a447',
                   lineHeight: 1,
                 }}
               >
                 {user.compatibilityScore}%
               </span>
-              <p style={{ color: '#aaaaaa', margin: '4px 0 0', fontSize: '13px' }}>
+              <p
+                style={{
+                  color: '#aaaaaa',
+                  margin: '4px 0 0',
+                  fontSize: '13px',
+                }}
+              >
                 compatibility
               </p>
             </div>
-
             {/* Skills */}
             <div>
-              <p style={{ color: '#aaaaaa', fontSize: '12px', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+              <p
+                style={{
+                  color: '#aaaaaa',
+                  fontSize: '12px',
+                  margin: '0 0 8px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                }}
+              >
                 Skills
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                {user.skills.map((skill) => (
-                  <span
-                    key={skill}
-                    style={{
-                      background: '#1a1a1a',
-                      border: '1px solid #333',
-                      color: '#ffffff',
-                      borderRadius: '20px',
-                      padding: '4px 12px',
-                      fontSize: '13px',
-                    }}
-                  >
-                    {skill}
-                  </span>
-                ))}
+                {user.skills.map((skill) => {
+                  const rating = user.skill_ratings?.[skill];
+                  return (
+                    <div
+                      key={skill}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        background: '#1a1a1a',
+                        border: '1px solid #333',
+                        borderRadius: '20px',
+                        padding: '4px 12px',
+                      }}
+                    >
+                      <span style={{ color: '#fff', fontSize: '13px' }}>
+                        {skill}
+                      </span>
+                      {rating && (
+                        <div style={{ display: 'flex', gap: '1px' }}>
+                          {[1, 2, 3, 4, 5].map((i) => (
+                            <span
+                              key={i}
+                              style={{
+                                color: i <= rating ? '#52a447' : '#333',
+                                fontSize: '11px',
+                              }}
+                            >
+                              ★
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
             {/* Experience */}
             <div>
-              <p style={{ color: '#aaaaaa', fontSize: '12px', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+              <p
+                style={{
+                  color: '#aaaaaa',
+                  fontSize: '12px',
+                  margin: '0 0 4px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                }}
+              >
                 Experience
               </p>
-              <p style={{ color: '#ffffff', margin: 0, fontSize: '15px', textTransform: 'capitalize' }}>
+              <p
+                style={{
+                  color: '#ffffff',
+                  margin: 0,
+                  fontSize: '15px',
+                  textTransform: 'capitalize',
+                }}
+              >
                 {user.level}
               </p>
             </div>
@@ -183,30 +251,62 @@ export default function SwipeCard({ user, onLike, onPass }: SwipeCardProps) {
             {/* Reasons */}
             <div style={{ borderTop: '1px solid #222', paddingTop: '12px' }}>
               {user.reasons.map((r, i) => (
-                <p key={i} style={{ color: '#aaaaaa', margin: '4px 0', fontSize: '13px' }}>
+                <p
+                  key={i}
+                  style={{
+                    color: '#aaaaaa',
+                    margin: '4px 0',
+                    fontSize: '13px',
+                  }}
+                >
                   ✦ {r}
                 </p>
               ))}
             </div>
 
             {/* Buttons */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginTop: '8px' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '24px',
+                marginTop: '8px',
+              }}
+            >
               <button
-                onClick={() => { setDirection('left'); setGone(true); onPass(user.id); }}
+                onClick={() => {
+                  setDirection('left');
+                  setGone(true);
+                  onPass(user.id);
+                }}
                 style={{
-                  width: '56px', height: '56px', borderRadius: '50%',
-                  background: '#1a1a1a', border: '1px solid #333',
-                  color: '#ff1744', fontSize: '22px', cursor: 'pointer',
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: '50%',
+                  background: '#1a1a1a',
+                  border: '1px solid #333',
+                  color: '#ff1744',
+                  fontSize: '22px',
+                  cursor: 'pointer',
                 }}
               >
                 ✕
               </button>
               <button
-                onClick={() => { setDirection('right'); setGone(true); onLike(user.id); }}
+                onClick={() => {
+                  setDirection('right');
+                  setGone(true);
+                  onLike(user.id);
+                }}
                 style={{
-                  width: '56px', height: '56px', borderRadius: '50%',
-                  background: '#ff2e88', border: 'none',
-                  color: '#ffffff', fontSize: '22px', cursor: 'pointer',
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: '50%',
+                  background: '#52a447',
+                  border: 'none',
+                  color: '#ffffff',
+                  fontSize: '22px',
+                  cursor: 'pointer',
                 }}
               >
                 ♥

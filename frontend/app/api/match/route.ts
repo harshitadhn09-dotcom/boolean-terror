@@ -42,7 +42,7 @@ export async function GET(req: Request) {
   }
 
   // calculate compatibility for each
-  const results = candidates.map((candidate: User) => {
+  let results = candidates.map((candidate: User) => {
     const { score, reasons } = calculateMatch(currentUser as User, candidate);
     return {
       id: candidate.id,
@@ -50,13 +50,19 @@ export async function GET(req: Request) {
       university: candidate.university,
       skills: candidate.skills,
       level: candidate.level,
+      skill_ratings: candidate.skill_ratings ?? {},
       compatibilityScore: score,
       reasons,
     };
   });
 
   // sort by best match first
-  results.sort((a: { compatibilityScore: number }, b: { compatibilityScore: number }) => b.compatibilityScore - a.compatibilityScore);
-
+  results.sort(
+    (a: { compatibilityScore: number }, b: { compatibilityScore: number }) =>
+      b.compatibilityScore - a.compatibilityScore,
+  );
+  results = results.filter(
+    (r: { compatibilityScore: number }) => r.compatibilityScore >= 45,
+  );
   return NextResponse.json(results);
 }
