@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { calculateMatch } from '@/lib/matching';
+import { User } from '@/types/user';
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -9,28 +11,52 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'userId required' }, { status: 400 });
   }
 
-  // get all matches where user is user1 or user2
-  const { data: matchRows, error } = await supabase
-    .from('matches')
-    .select('user1, user2')
-    .or(`user1.eq.${userId},user2.eq.${userId}`);
+  // get current user
+  const { data: currentUser, error: userError } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', userId)
+    .single();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (userError || !currentUser) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
   }
 
-  // get the other person's id from each match
-  const otherIds = matchRows.map((m) =>
-    m.user1 === userId ? m.user2 : m.user1
-  );
+  // get users already liked by current user
+  const { data: likes } = await supabase
+    .from('likes')
+    .select('target_id')
+    .eq('user_id', userId);
 
-  if (otherIds.length === 0) return NextResponse.json([]);
+  const likedIds = (likes ?? []).map((l: { target_id: string }) => l.target_id);
+  likedIds.push(userId); // exclude self
 
-  // fetch their profiles
-  const { data: users } = await supabase
+  // get all other users not yet liked
+  const { data: candidates, error: candError } = await supabase
     .from('users')
-    .select('id, name, university, skills, level, linkedin, email')
-    .in('id', otherIds);
+    .select('*')
+    .not('id', 'in', `(${likedIds.join(',')})`);
 
-  return NextResponse.json(users ?? []);
+  if (candError || !candidates) {
+    return NextResponse.json([]);
+  }
+
+  // calculate compatibility for each
+  const results = candidates.map((candidate: User) => {
+    const { score, reasons } = calculateMatch(currentUser as User, candidate);
+    return {
+      id: candidate.id,
+      name: candidate.name,
+      university: candidate.university,
+      skills: candidate.skills,
+      level: candidate.level,
+      compatibilityScore: score,
+      reasons,
+    };
+  });
+
+  // sort by best match first
+  results.sort((a: { compatibilityScore: number }, b: { compatibilityScore: number }) => b.compatibilityScore - a.compatibilityScore);
+
+  return NextResponse.json(results);
 }
